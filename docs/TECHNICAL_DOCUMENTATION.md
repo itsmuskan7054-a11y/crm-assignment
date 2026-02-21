@@ -364,8 +364,7 @@ Flyway runs automatically on startup:
 
 ### 7.1 Tools Used
 
-- **Claude (Anthropic)**: Primary AI assistant for architecture design, code generation, and documentation
-- **Cursor IDE**: AI-powered IDE for code completion and editing
+- **Claude (Anthropic)**: AI assistant for architecture design, code generation, and documentation
 
 ### 7.2 Use Cases
 
