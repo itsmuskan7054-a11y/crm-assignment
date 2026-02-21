@@ -1,0 +1,171 @@
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: palmonas-crm
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:palmonas_crm}
+    username: ${POSTGRES_USER:palmonas}
+    password: ${POSTGRES_PASSWORD:}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 10000
+      max-lifetime: 600000
+      leak-detection-threshold: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        default_schema: public
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+        format_sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 5000ms
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+          max-wait: 5000ms
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:}
+    access-token-expiry: ${JWT_ACCESS_TOKEN_EXPIRY:900000}
+    refresh-token-expiry: ${JWT_REFRESH_TOKEN_EXPIRY:604800000}
+  admin:
+    email: ${ADMIN_EMAIL:admin@palmonas.com}
+    password: ${ADMIN_PASSWORD:Admin@123}
+  rate-limit:
+    requests-per-second: ${RATE_LIMIT_REQUESTS_PER_SECOND:100}
+  channel:
+    simulator:
+      failure-rate: ${CHANNEL_SIMULATOR_FAILURE_RATE:0.1}
+    sync-cron: ${CHANNEL_SYNC_CRON:0 */5 * * * *}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+  health:
+    redis:
+      enabled: true
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+
+springdoc:
+  api-docs:
+    path: /docs/api-docs
+  swagger-ui:
+    path: /docs/swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        slow-call-rate-threshold: 80
+        slow-call-duration-threshold: 3s
+        record-exceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - org.springframework.web.client.RestClientException
+    instances:
+      amazonChannel:
+        base-config: default
+      flipkartChannel:
+        base-config: default
+      websiteChannel:
+        base-config: default
+
+  retry:
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 1s
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+    instances:
+      amazonChannel:
+        base-config: default
+      flipkartChannel:
+        base-config: default
+      websiteChannel:
+        base-config: default
+
+  ratelimiter:
+    configs:
+      default:
+        limit-for-period: 100
+        limit-refresh-period: 1s
+        timeout-duration: 0s
+    instances:
+      apiRateLimit:
+        base-config: default
+
+  bulkhead:
+    configs:
+      default:
+        max-concurrent-calls: 10
+        max-wait-duration: 500ms
+    instances:
+      amazonChannel:
+        base-config: default
+      flipkartChannel:
+        base-config: default
+      websiteChannel:
+        base-config: default
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+    com.palmonas.crm: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: WARN
