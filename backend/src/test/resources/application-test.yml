@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/palmonas_crm_test
+    username: palmonas
+    password: test_password
+  flyway:
+    enabled: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+app:
+  jwt:
+    secret: test-secret-key-for-unit-tests-minimum-32-characters-long-enough-for-hs512
+    access-token-expiry: 900000
+    refresh-token-expiry: 604800000
+  admin:
+    email: admin@test.com
+    password: TestPass@123
+  rate-limit:
+    requests-per-second: 1000
+  channel:
+    simulator:
+      failure-rate: 0.0
+    sync-cron: "-"
