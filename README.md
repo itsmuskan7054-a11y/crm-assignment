@@ -28,21 +28,22 @@ A production-grade admin CRM portal for managing customer orders from multiple e
 
 ```bash
 # Clone the repository
-git clone <repo-url>
-cd palmonas-assignment
+git clone https://github.com/itsmuskan7054-a11y/crm-assignment.git
+cd crm-assignment
 
 # Copy environment file
 cp .env.example .env
 
-# Build and start all services
+# Build and start all services (first run takes ~3-5 min)
 docker compose up --build
 
-# Access the application
-# Frontend: http://localhost:3000
-# Backend API: http://localhost:8080/api
-# Swagger UI: http://localhost:8080/api/docs/swagger-ui.html
-# Nginx Proxy: http://localhost:80
+# Wait for "Started CrmApplication" in the backend logs, then open:
+# Frontend + API:  http://localhost:3000
+# Swagger UI:      http://localhost:8080/api/docs/swagger-ui.html
 ```
+
+> **Note:** The backend takes ~30-60s to start (Flyway migrations + seed data on first run).
+> The frontend at `http://localhost:3000` proxies all `/api` calls to the backend automatically.
 
 ### Default Admin Credentials
 
